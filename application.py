@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from model_func_gpt import ask, model_d
+from model_func_gpt import ask, get_top_similar_texts as model_d
 
 import json
 
@@ -12,8 +12,8 @@ def hello():
     print("Hello, service started")
 
 
-@app.route('/vector', methods=['GET', 'POST'])
-def calc_vec():
+@app.route('/similar_rows', methods=['GET', 'POST'])
+def find_rows():
     if request.method == "POST":
         data = request.get_json()
         if not data:
@@ -23,8 +23,8 @@ def calc_vec():
         except KeyError as err:
             return "No search string provided"
         print("search_string ---- > ", search_string)
-        emb = model_d(search_string)
-        res = json.dumps({'vector': str(emb)})
+        texts = model_d(search_string)
+        res = json.dumps({'tests': str(texts)})
         return res
     return "Not a proper request method or data"
 

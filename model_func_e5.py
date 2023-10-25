@@ -8,8 +8,8 @@ openai.api_key = os.environ.get("OPENAI_API_KEY")
 EMBEDDING_MODEL = "text-embedding-ada-002"
 GPT_MODEL = "gpt-3.5-turbo"
 
-tokenizer = AutoTokenizer.from_pretrained('multilingual-e5-base')
-model = AutoModel.from_pretrained('multilingual-e5-base')
+tokenizer = AutoTokenizer.from_pretrained('models/E5/multilingual-e5-base')
+model = AutoModel.from_pretrained('models/E5/multilingual-e5-base')
 
 
 def num_tokens(text: str, model: str = GPT_MODEL) -> int:
