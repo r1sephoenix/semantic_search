@@ -4,12 +4,20 @@ import openai
 from scipy import spatial
 import ast
 
+import psycopg2
+import pgvector
+from psycopg2.extras import execute_values
+from pgvector.psycopg2 import register_vector
+
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 EMBEDDING_MODEL = "text-embedding-ada-002"
 GPT_MODEL = "gpt-3.5-turbo"
 
-df = pd.read_csv('embeddings.csv')
-df['embedding'] = df['embedding'].apply(ast.literal_eval)
+conn = psycopg2.connect(connection_string)
+cur = conn.cursor()
+
+cur.execute("CREATE EXTENSION IF NOT EXISTS vector");
+conn.commit()
 
 
 # search function
@@ -84,6 +92,20 @@ def ask(
     )
     response_message = response["choices"][0]["message"]["content"]
     return response_message
+
+
+def get_top_similar_texts(query_embedding, conn):
+    embedding_array = np.array(query_embedding)
+    # Register pgvector extension
+    register_vector(conn)
+    cur = conn.cursor()
+    # Get the top 3 most similar documents using the KNN <=> operator
+    cur.execute("SELECT content FROM embeddings ORDER BY embedding <=> %s LIMIT 3", (embedding_array,))
+    top3_docs = cur.fetchall()
+    return top3_docs
+
+
+
 
 
 
