@@ -96,11 +96,9 @@ def ask(
 
 def get_top_similar_texts(query_embedding, conn):
     embedding_array = np.array(query_embedding)
-    # Register pgvector extension
     register_vector(conn)
     cur = conn.cursor()
-    # Get the top 3 most similar documents using the KNN <=> operator
-    cur.execute("SELECT content FROM embeddings ORDER BY embedding <=> %s LIMIT 3", (embedding_array,))
+    cur.execute("SELECT content FROM embeddings ORDER BY embedding <=> %s LIMIT 5", (embedding_array,))
     top3_docs = cur.fetchall()
     return top3_docs
 

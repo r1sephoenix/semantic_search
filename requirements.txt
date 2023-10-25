@@ -1,0 +1,8 @@
+openai
+fastapi
+pandas
+numpy
+tiktoken
+psycopg2
+pgvector
+python-dotenv
