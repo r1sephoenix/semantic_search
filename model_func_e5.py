@@ -1,11 +1,15 @@
 import tiktoken
 import openai
 import os
-import multiprocessing
+import torch
+from transformers import AutoTokenizer, AutoModel
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 EMBEDDING_MODEL = "text-embedding-ada-002"
 GPT_MODEL = "gpt-3.5-turbo"
+
+tokenizer = AutoTokenizer.from_pretrained('multilingual-e5-base')
+model = AutoModel.from_pretrained('multilingual-e5-base')
 
 
 def num_tokens(text: str, model: str = GPT_MODEL) -> int:
@@ -47,18 +51,16 @@ def ask(query: str, strings: list[str], model: str = GPT_MODEL, token_budget: in
     return response_message
 
 
-def create_emb(query: str, model: str=EMBEDDING_MODEL) -> str:
-    return openai.Embedding.create(input=query, engine=model)['data'][0]['embedding']
+def mean_pooling(model_output, attention_mask):
+    token_embeddings = model_output[0]
+    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+    sum_embeddings = torch.sum(token_embeddings * input_mask_expanded, 1)
+    sum_mask = torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+    return sum_embeddings / sum_mask
 
 
-def cr_emb(search_string, r_dict, run):
-    while run.is_set():
-        try:
-            vec = create_emb(search_string)
-            r_dict['vec'] = vec
-            run.clear()  # Stop running.
-            break
-        except:
-            pass
-
-
+def model_d(sent):
+    with torch.no_grad():
+        encoded_input = tokenizer(sent, padding=True, truncation=True, max_length=24, return_tensors='pt')
+        model_output = model(**encoded_input)
+    return mean_pooling(model_output, encoded_input['attention_mask'])[0].tolist()
