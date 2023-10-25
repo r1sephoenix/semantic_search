@@ -13,7 +13,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 RUN pip install --no-cache-dir -r requirements.txt && \
     python3 download_models.py
 
-COPY . .
 
 EXPOSE 5000
 CMD [ "python", "application.py"]
