@@ -1,10 +1,11 @@
 openai
-fastapi
+flask
 pandas
 numpy
 tiktoken
-psycopg2
 pgvector
 transformers
 torch
+psycopg2
+sshtunel
 
