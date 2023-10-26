@@ -1,8 +1,9 @@
 import psycopg2
 from sshtunnel import SSHTunnelForwarder
 import yaml
-
 from pathlib import Path
+from dotenv import load_dotenv
+from configparser import ConfigParser
 
 config_dir = Path(__file__).parent.parent.resolve() / 'config'
 
@@ -12,10 +13,22 @@ with open(config_dir / 'config.yml', 'r') as f:
 Host = config_yaml['Hostname']
 User = config_yaml['User']
 Path_to_ssh_key = config_yaml['Path_to_ssh_key']
-Db_name = config_yaml['Db_name']
-Db_user = config_yaml['Db_user']
-Db_password = config_yaml['Db_password']
-Db_port = config_yaml['Db_port']
+
+load_dotenv()
+
+BASE_DIR = Path(__file__).parents[1]
+DB_INIT_FILE = BASE_DIR / 'config/database.ini'
+
+
+def db_config(filename: Path = DB_INIT_FILE, section: str = 'postgresql'):
+    parser = ConfigParser()
+    parser.read(filename)
+    if parser.has_section(section):
+        params = parser.items(section)
+        db = {param[0]: param[1] for param in params}
+    else:
+        raise Exception(f'Section {section} not found in the {filename} file')
+    return db
 
 
 def create_db_connection():
@@ -23,17 +36,13 @@ def create_db_connection():
         (Host, 22),
         ssh_username=User,
         ssh_private_key=Path_to_ssh_key,
-        remote_bind_address=('localhost', Db_port),
-        #local_bind_address=('localhost', 6543)
+        remote_bind_address=('0.0.0.0', Db_port)
     )
     tunnel.start()
+
     try:
-        conn = psycopg2.connect(
-            database=Db_name,
-            user=Db_user,
-            password=Db_password,
-            port=Db_port
-        )
+        params = db_config()
+        conn = psycopg2.connect(**params)
         return tunnel, conn
     except (Exception, psycopg2.Error) as error:
         print('Error while connecting', error)

@@ -1,7 +1,9 @@
 Hostname: '87.228.3.14'
 User: 'i.mikheev'
-Path_to_ssh_key: '/Users/ilyamikheev/.ssh/id_ed25519/ssh_key'
+Path_to_ssh_key: '/Users/ilyamikheev/.ssh/id_ed25519'
 Db_name: 'vectordb'
 Db_user: 'testuser'
 Db_password: 'testpwd'
 Db_port: 5432
+
+openai_api_key: "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"

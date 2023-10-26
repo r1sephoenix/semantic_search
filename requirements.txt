@@ -2,6 +2,7 @@ openai
 flask
 pandas
 numpy
+scipy
 tiktoken
 pgvector
 transformers

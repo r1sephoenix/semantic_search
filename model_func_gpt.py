@@ -2,6 +2,7 @@ import pandas as pd
 import tiktoken
 import openai
 from scipy import spatial
+import numpy as np
 import ast
 
 import psycopg2
@@ -99,7 +100,7 @@ def get_top_similar_texts(query_embedding, conn):
     register_vector(conn)
     cur = conn.cursor()
     cur.execute("SELECT content FROM embeddings ORDER BY embedding <=> %s LIMIT 5", (embedding_array,))
-    top3_docs = cur.fetchall()
+    top5_docs = cur.fetchall()
     return top3_docs
 
 
