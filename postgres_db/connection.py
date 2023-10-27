@@ -5,6 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from configparser import ConfigParser
 
+
 config_dir = Path(__file__).parent.parent.resolve() / 'config'
 
 with open(config_dir / 'config.yml', 'r') as f:
@@ -13,6 +14,7 @@ with open(config_dir / 'config.yml', 'r') as f:
 Host = config_yaml['Hostname']
 User = config_yaml['User']
 Path_to_ssh_key = config_yaml['Path_to_ssh_key']
+Db_port = config_yaml['Db_port']
 
 load_dotenv()
 
@@ -31,7 +33,7 @@ def db_config(filename: Path = DB_INIT_FILE, section: str = 'postgresql'):
     return db
 
 
-def create_db_connection():
+def create_db_ssh_connection():
     tunnel = SSHTunnelForwarder(
         (Host, 22),
         ssh_username=User,
@@ -46,6 +48,16 @@ def create_db_connection():
         return tunnel, conn
     except (Exception, psycopg2.Error) as error:
         print('Error while connecting', error)
+    return None
+
+
+def create_db_connection():
+    params = db_config()
+    try:
+        conn = psycopg2.connect(**params)
+        return conn
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting", error)
     return None
 
 
